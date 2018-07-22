@@ -26,9 +26,9 @@ const reorder = (list, startIndex, endIndex) => {
 class App extends Component {
     state = {
         cards: [
-            {id: '34', list: getItems(10), title: 'Hello'},
-            {id: '232', list: getItems(3), title: 'World'},
-            {id: '23', list: getItems(2), title: 'Adios'}
+            {id: `${uuidv1().slice(0,9)}`, list: getItems(10), title: 'Hello'},
+            {id: `${uuidv1().slice(0,9)}`, list: getItems(3), title: 'World'},
+            {id: `${uuidv1().slice(0,9)}`, list: getItems(2), title: 'Adios'}
         ],
         inputText: [''],
         inputTitle: ''
@@ -62,9 +62,6 @@ class App extends Component {
                 list: destClone,
                 title: destination.title
             }];
-        /*result[sourceKey] = sourceClone;
-      result[destinationKey] = destClone;*/
-        console.log(result)
         return result;
     };
 
@@ -141,7 +138,7 @@ class App extends Component {
             },
             cards: {
                 $push: [{
-                    id: `${Math.ceil(Math.random())}`,
+                    id: `${uuidv1().slice(0,9)}`,
                     title: this.state.inputTitle,
                     list: []
                 }]
@@ -157,21 +154,54 @@ class App extends Component {
         }))
     }
 
+    deleteItem = (item, id) => {
+        let filterItem = this.state.cards[id].list.filter(list => list.id !== item.id)
+        this.setState(update(this.state, {
+            cards: {
+                [id]: {
+                    $set: {
+                        list: filterItem,
+                        title: this.state.cards[id].title,
+                        id: this.state.cards[id].id
+                    }
+                }
+            }
+        }))
+    }
+
+    deleteCard = (id) => {
+        this.setState(update(this.state, {
+            cards: {
+                $splice: [[id, 1]]
+            }
+        }))
+    }
+
     render() {
+        const formContainer = {backgroundColor: 'lightgrey', padding: '8px'}
+        const button = {padding: '3px', marginLeft: '8px'}
         return (
             <DragDropContext onDragEnd={this.onDragEnd}>
                 {this.state.cards.map((card, index) => (
                     <div key={index}>
-                        <KanbanColumn key={index} droppableId={`${card.id}`} data={card.list} title={card.title}/>
-                        <form onSubmit={(e) => this.submit(e, index)}>
-                            <input value={this.state.inputText[index]} onChange={(e) => this.change(e, index)}/>
-                            <button type='submit'>Submit</button>
-                        </form>
+                        <KanbanColumn deleteItem={this.deleteItem}
+                                      deleteCard={this.deleteCard}
+                                      i={index}
+                                      key={index}
+                                      droppableId={`${card.id}`}
+                                      data={card.list}
+                                      title={card.title} />
+                        <div style={formContainer}>
+                            <form onSubmit={(e) => this.submit(e, index)}>
+                                <input value={this.state.inputText[index]} onChange={(e) => this.change(e, index)}/>
+                                <button style={button} type='submit'>Submit</button>
+                            </form>
+                        </div>
                     </div>
                 ))}
                 <form onSubmit={(e) => this.submitCard(e)}>
                     <input value={this.state.inputTitle} onChange={(e) => this.changeCard(e)}/>
-                    <button type='submit'>New Card</button>
+                    <button style={button} type='submit'>New Card</button>
                 </form>
             </DragDropContext>
         );
