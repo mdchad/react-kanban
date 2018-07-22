@@ -15,7 +15,8 @@ const getItems = (count, offset = 0) =>
 
 // a little function to help us with reordering the result
 const reorder = (list, startIndex, endIndex) => {
-    const result = Array.from(list);
+    const result = Array.from(list.list);
+    console.log(result)
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
 
@@ -25,16 +26,18 @@ const reorder = (list, startIndex, endIndex) => {
 class App extends Component {
     state = {
         cards: [
-            getItems(10),
-            getItems(4),
-            getItems(5),
-            getItems(3)
+            { id: '34', list: getItems(10), title: 'Hello' },
+            { id: '232', list: getItems(3), title: 'World' },
+            { id: '23', list: getItems(2), title: 'Adios' },
         ],
-        inputText: ['']
+        inputText: [''],
+        inputTitle: ''
     };
 
 
-    getList = id => this.state.cards[id];
+    getList = id => {
+        return this.state.cards.find(card => card.id === id);
+    }
 
     /**
      * Moves an item from one list to another list.
@@ -55,12 +58,13 @@ class App extends Component {
         };
         /*result[sourceKey] = sourceClone;
       result[destinationKey] = destClone;*/
-
+        console.log(result)
         return result;
     };
 
     onDragEnd = result => {
         const { source, destination } = result;
+        console.log(result)
 
         // dropped outside the list
         if (!destination) {
@@ -72,21 +76,26 @@ class App extends Component {
 
         if (source.droppableId === destination.droppableId) {
             const items = reorder(sourceList, source.index, destination.index);
-
+            console.log(items)
             this.setState(update(this.state, {
-                cards: {
-                    [source.droppableId]: {
-                        $set: items
+                cards: [{
+                    id: {
+                        [source.droppableId]: {
+                            $set: {
+                                list: items
+                            }
+                        }
                     }
-                }
+                }]
             }));
+            console.log(this.state)
 
         } else {
             const result = Object.assign(
                 this.state.cards,
                 this.move(sourceList, destinationList, source, destination)
             );
-            console.log(result)
+            console.log('after assign', result)
             this.setState({
                 items: result.droppable,
                 selected: result.droppable2
@@ -115,12 +124,14 @@ class App extends Component {
             },
             cards: {
                 [index]: {
-                    $push: [
-                        {
-                            id: uuidv1().slice(0, 11),
-                            content: this.state.inputText[index]
-                        }
-                    ]
+                    list: {
+                        $push: [
+                            {
+                                id: uuidv1().slice(0, 11),
+                                content: this.state.inputText[index]
+                            }
+                        ]
+                    }
                 }
             }
         }))
@@ -129,13 +140,24 @@ class App extends Component {
     submitCard = (e) => {
         e.preventDefault()
         this.setState(update(this.state, {
+            inputTitle: {
+                $set: ''
+            },
             cards: {
-                $push: [
-                    []
-                ]
+                $push: [{
+                    title: this.state.inputTitle,
+                    list: []
+                }]
             }
         }))
-        console.log(this.state)
+    }
+
+    changeCard = (e) => {
+        this.setState(update(this.state, {
+            inputTitle: {
+                $set: e.target.value
+            }
+        }))
     }
 
     render() {
@@ -143,7 +165,7 @@ class App extends Component {
             <DragDropContext onDragEnd={this.onDragEnd}>
                 {this.state.cards.map((card, index) => (
                     <div key={index}>
-                        <KanbanColumn key={index} droppableId={`${index}`} data={card} />
+                        <KanbanColumn key={index} droppableId={`${card.id}`} data={card.list} title={card.title}/>
                         <form onSubmit={(e) => this.submit(e, index)}>
                             <input value={this.state.inputText[index]} onChange={(e) => this.change(e, index)} />
                             <button type='submit'>Submit</button>
@@ -151,6 +173,7 @@ class App extends Component {
                     </div>
                 ))}
                 <form onSubmit={(e) => this.submitCard(e)}>
+                    <input value={this.state.inputTitle} onChange={(e) => this.changeCard(e)} />
                     <button type='submit'>New Card</button>
                 </form>
             </DragDropContext>

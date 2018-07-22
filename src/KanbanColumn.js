@@ -5,7 +5,7 @@ import { Droppable, Draggable } from 'react-beautiful-dnd';
 const grid = 8;
 
 const getItemStyle = (isDragging, draggableStyle) => ({
-    // some basic styles to make the items look a bit nicer
+    // some basic styles to make the list look a bit nicer
     userSelect: 'none',
     padding: grid * 2,
     margin: `0 0 ${grid}px 0`,
@@ -23,7 +23,7 @@ const getListStyle = isDraggingOver => ({
     width: 250
 });
 
-const KanbanColumn = ({ droppableId, data }) => {
+const KanbanColumn = ({ droppableId, data, title }) => {
     if (!data) {
         return null
     }
@@ -32,6 +32,7 @@ const KanbanColumn = ({ droppableId, data }) => {
             <div
                 ref={provided.innerRef}
                 style={getListStyle(snapshot.isDraggingOver)}>
+                {title}
                 {data.map((item, index) => (
                     <Draggable
                         key={item.id}
