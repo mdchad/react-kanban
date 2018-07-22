@@ -26,7 +26,7 @@ const reorder = (list, startIndex, endIndex) => {
 class App extends Component {
     state = {
         cards: [
-            {id: `${uuidv1().slice(0,9)}`, list: getItems(10), title: 'Hello'},
+            {id: `${uuidv1().slice(0,6)}`, list: getItems(10), title: 'Hello'},
             {id: `${uuidv1().slice(0,9)}`, list: getItems(3), title: 'World'},
             {id: `${uuidv1().slice(0,9)}`, list: getItems(2), title: 'Adios'}
         ],
