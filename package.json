@@ -1,6 +1,7 @@
 {
   "name": "react-kanban",
   "version": "0.1.0",
+  "homepage" : "http://myname.github.io/myapp",
   "private": true,
   "dependencies": {
     "immutability-helper": "^2.7.1",
