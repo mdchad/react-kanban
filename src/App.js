@@ -12,6 +12,7 @@ const getItems = (count, offset = 0) =>
         content: `item ${k + offset}`
     }));
 
+
 // a little function to help us with reordering the result
 const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -23,14 +24,15 @@ const reorder = (list, startIndex, endIndex) => {
 
 class App extends Component {
     state = {
-        inputText: [''],
         cards: [
             getItems(10),
             getItems(4),
             getItems(5),
             getItems(3)
-        ]
+        ],
+        inputText: ['']
     };
+
 
     getList = id => this.state.cards[id];
 
@@ -84,11 +86,12 @@ class App extends Component {
                 this.state.cards,
                 this.move(sourceList, destinationList, source, destination)
             );
-
+            console.log(result)
             this.setState({
                 items: result.droppable,
                 selected: result.droppable2
             });
+            console.log(this.state)
         }
     };
 
@@ -123,6 +126,18 @@ class App extends Component {
         }))
     }
 
+    submitCard = (e) => {
+        e.preventDefault()
+        this.setState(update(this.state, {
+            cards: {
+                $push: [
+                    []
+                ]
+            }
+        }))
+        console.log(this.state)
+    }
+
     render() {
         return (
             <DragDropContext onDragEnd={this.onDragEnd}>
@@ -135,6 +150,9 @@ class App extends Component {
                         </form>
                     </div>
                 ))}
+                <form onSubmit={(e) => this.submitCard(e)}>
+                    <button type='submit'>New Card</button>
+                </form>
             </DragDropContext>
         );
     }
