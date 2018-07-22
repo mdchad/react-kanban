@@ -43,8 +43,8 @@ class App extends Component {
      * Moves an item from one list to another list.
      */
     move = (source, destination, droppableSource, droppableDestination) => {
-        const sourceClone = Array.from(source);
-        const destClone = Array.from(destination);
+        const sourceClone = Array.from(source.list);
+        const destClone = Array.from(destination.list);
         const [removed] = sourceClone.splice(droppableSource.index, 1);
 
         destClone.splice(droppableDestination.index, 0, removed);
@@ -52,10 +52,20 @@ class App extends Component {
         const sourceKey = droppableSource.droppableId;
         const destinationKey = droppableDestination.droppableId;
 
-        const result = {
-            [sourceKey]: sourceClone,
-            [destinationKey]: destClone
-        };
+        const result =
+            {
+                source: {
+                    id: sourceKey,
+                    list: sourceClone,
+                    title: source.title
+                },
+
+                destination: {
+                    id: destinationKey,
+                    list: destClone,
+                    title: destination.title
+                }
+            };
         /*result[sourceKey] = sourceClone;
       result[destinationKey] = destClone;*/
         console.log(result)
@@ -72,11 +82,10 @@ class App extends Component {
 
         const sourceList = this.getList(source.droppableId);
         const destinationList = this.getList(destination.droppableId);
+        const columnIndex = this.state.cards.findIndex(card => card.id === source.droppableId)
 
         if (source.droppableId === destination.droppableId) {
             const items = reorder(sourceList, source.index, destination.index);
-            const columnIndex = this.state.cards.findIndex(card => card.id === source.droppableId)
-            console.log(items)
             this.setState(update(this.state, {
                 cards: {
                     [columnIndex]: {
@@ -88,18 +97,22 @@ class App extends Component {
                     }
                 }
             }));
-            console.log(this.state)
 
         } else {
-            const result = Object.assign(
-                this.state.cards,
-                this.move(sourceList, destinationList, source, destination)
+            // this.setState(update(this.state, {
+            //     cards: [{
+            //         $merge: this.move(sourceList, destinationList, source, destination)
+            //     }]
+            // }))
+            const move = this.move(sourceList, destinationList, source, destination)
+            console.log(move.destination)
+            console.log(move.source)
+            const cards = Object.assign(
+                move.source,
+                move.destination,
             );
-            console.log('after assign', result)
-            this.setState({
-                items: result.droppable,
-                selected: result.droppable2
-            });
+            console.log(cards)
+            this.setState({ cards });
             console.log(this.state)
         }
     };
@@ -145,6 +158,7 @@ class App extends Component {
             },
             cards: {
                 $push: [{
+                    id: `${Math.ceil(Math.random())}`,
                     title: this.state.inputTitle,
                     list: []
                 }]
