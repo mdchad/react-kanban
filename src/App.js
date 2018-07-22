@@ -52,20 +52,16 @@ class App extends Component {
         const sourceKey = droppableSource.droppableId;
         const destinationKey = droppableDestination.droppableId;
 
-        const result =
+        const result = [{
+                id: sourceKey,
+                list: sourceClone,
+                title: source.title
+            },
             {
-                source: {
-                    id: sourceKey,
-                    list: sourceClone,
-                    title: source.title
-                },
-
-                destination: {
-                    id: destinationKey,
-                    list: destClone,
-                    title: destination.title
-                }
-            };
+                id: destinationKey,
+                list: destClone,
+                title: destination.title
+            }];
         /*result[sourceKey] = sourceClone;
       result[destinationKey] = destClone;*/
         console.log(result)
@@ -97,23 +93,10 @@ class App extends Component {
                     }
                 }
             }));
-
         } else {
-            // this.setState(update(this.state, {
-            //     cards: [{
-            //         $merge: this.move(sourceList, destinationList, source, destination)
-            //     }]
-            // }))
-            const move = this.move(sourceList, destinationList, source, destination)
-            console.log(move.destination)
-            console.log(move.source)
-            const cards = Object.assign(
-                move.source,
-                move.destination,
-            );
-            console.log(cards)
-            this.setState({ cards });
-            console.log(this.state)
+            const moves = this.move(sourceList, destinationList, source, destination)
+            const findSource = this.state.cards.map(card => moves.find(move => move.id === card.id) || card);
+            this.setState({cards: findSource});
         }
     };
 
