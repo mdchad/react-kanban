@@ -1,13 +1,14 @@
-import React, { Component } from 'react';
-import { DragDropContext } from 'react-beautiful-dnd';
+import React, {Component} from 'react';
+import {DragDropContext} from 'react-beautiful-dnd';
 import update from 'immutability-helper';
 import KanbanColumn from './KanbanColumn';
+
 const uuidv1 = require('uuid/v1');
 
 
 // fake data generator
 const getItems = (count, offset = 0) =>
-    Array.from({ length: count }, (v, k) => k).map(k => ({
+    Array.from({length: count}, (v, k) => k).map(k => ({
         id: `item-${k + offset + uuidv1().slice(0, 11)}`,
         content: `item ${k + offset}`
     }));
@@ -16,7 +17,6 @@ const getItems = (count, offset = 0) =>
 // a little function to help us with reordering the result
 const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list.list);
-    console.log(result)
     const [removed] = result.splice(startIndex, 1);
     result.splice(endIndex, 0, removed);
 
@@ -26,9 +26,9 @@ const reorder = (list, startIndex, endIndex) => {
 class App extends Component {
     state = {
         cards: [
-            { id: '34', list: getItems(10), title: 'Hello' },
-            { id: '232', list: getItems(3), title: 'World' },
-            { id: '23', list: getItems(2), title: 'Adios' },
+            {id: '34', list: getItems(10), title: 'Hello'},
+            {id: '232', list: getItems(3), title: 'World'},
+            {id: '23', list: getItems(2), title: 'Adios'}
         ],
         inputText: [''],
         inputTitle: ''
@@ -63,8 +63,7 @@ class App extends Component {
     };
 
     onDragEnd = result => {
-        const { source, destination } = result;
-        console.log(result)
+        const {source, destination} = result;
 
         // dropped outside the list
         if (!destination) {
@@ -76,17 +75,18 @@ class App extends Component {
 
         if (source.droppableId === destination.droppableId) {
             const items = reorder(sourceList, source.index, destination.index);
+            const columnIndex = this.state.cards.findIndex(card => card.id === source.droppableId)
             console.log(items)
             this.setState(update(this.state, {
-                cards: [{
-                    id: {
-                        [source.droppableId]: {
-                            $set: {
-                                list: items
-                            }
+                cards: {
+                    [columnIndex]: {
+                        $set: {
+                            id: source.droppableId,
+                            list: items,
+                            title: this.state.cards[columnIndex].title
                         }
                     }
-                }]
+                }
             }));
             console.log(this.state)
 
@@ -167,13 +167,13 @@ class App extends Component {
                     <div key={index}>
                         <KanbanColumn key={index} droppableId={`${card.id}`} data={card.list} title={card.title}/>
                         <form onSubmit={(e) => this.submit(e, index)}>
-                            <input value={this.state.inputText[index]} onChange={(e) => this.change(e, index)} />
+                            <input value={this.state.inputText[index]} onChange={(e) => this.change(e, index)}/>
                             <button type='submit'>Submit</button>
                         </form>
                     </div>
                 ))}
                 <form onSubmit={(e) => this.submitCard(e)}>
-                    <input value={this.state.inputTitle} onChange={(e) => this.changeCard(e)} />
+                    <input value={this.state.inputTitle} onChange={(e) => this.changeCard(e)}/>
                     <button type='submit'>New Card</button>
                 </form>
             </DragDropContext>
